@@ -172,37 +172,33 @@
     });
 })();
 
-async function sendData() {
-    // const data = getData();
-    // if (data.length === 0) {
-    //     return;
-    // }
-    // try {
-    //     await fetch("https://jsonplaceholder.typicode.com/posts", {
-    //         method: "POST",
-    //         body: JSON.stringify(data),
-    //         headers: {
-    //             "Content-type": "application/json; charset=UTF-8",
-    //         },
-    //     });
+var observingInterval;
+var sendingInterval;
 
-    //     setData([]);
-    // } catch (error) {}
-    console.log("Data sent");
-}
-
-var interval;
+const observingIntervalTime = 1000;
+const sendingIntervalTime = 2000;
 
 function startTracking() {
-    console.log("Start Tracking function called.");
-    interval = setInterval(() => {
+    observingInterval = setInterval(() => {
+        observe();
+    }, observingIntervalTime);
+
+    sendingInterval = setInterval(() => {
         sendData();
-    }, 2000);
+    }, sendingIntervalTime);
 }
 
 function stopTracking() {
-    console.log("Stop Tracking function called.");
-    clearInterval(interval);
+    clearInterval(observingInterval);
+    clearInterval(sendingInterval);
+}
+
+function observe() {
+    console.log("Observe");
+}
+
+async function sendData() {
+    console.log("Data sent");
 }
 
 const dataKey = "google_meet_data";
