@@ -48,7 +48,7 @@
         max-width: 200px;
         aspect-ratio: 1/1;
     }
-    .modal-btn, .start-tracking-btn {
+    .modal-btn, .start-tracking-btn, .stop-tracking-btn {
         padding: 10px 20px;
         background-color: #007bff;
         color: white;
@@ -64,6 +64,10 @@
     }
     .start-tracking-btn {
         margin-top: 20px;
+    }
+    .stop-tracking-btn {
+        margin-top: 20px;
+        background-color: #dc3545;
     }
     `;
 
@@ -109,6 +113,10 @@
     startTrackingBtn.classList.add("start-tracking-btn");
     startTrackingBtn.textContent = "Start Tracking";
 
+    const stopTrackingBtn = document.createElement("button");
+    stopTrackingBtn.classList.add("stop-tracking-btn");
+    stopTrackingBtn.textContent = "Stop Tracking";
+
     imageContainer.appendChild(image);
     imageContainer.appendChild(image2);
 
@@ -146,11 +154,70 @@
     });
 
     startTrackingBtn.addEventListener("click", () => {
+        startTrackingBtn.parentNode.replaceChild(
+            stopTrackingBtn,
+            startTrackingBtn
+        );
         startTracking();
+        closeModal();
+    });
+
+    stopTrackingBtn.addEventListener("click", () => {
+        stopTrackingBtn.parentNode.replaceChild(
+            startTrackingBtn,
+            stopTrackingBtn
+        );
+        stopTracking();
         closeModal();
     });
 })();
 
+async function sendData() {
+    // const data = getData();
+    // if (data.length === 0) {
+    //     return;
+    // }
+    // try {
+    //     await fetch("https://jsonplaceholder.typicode.com/posts", {
+    //         method: "POST",
+    //         body: JSON.stringify(data),
+    //         headers: {
+    //             "Content-type": "application/json; charset=UTF-8",
+    //         },
+    //     });
+
+    //     setData([]);
+    // } catch (error) {}
+    console.log("Data sent");
+}
+
+var interval;
+
 function startTracking() {
     console.log("Start Tracking function called.");
+    interval = setInterval(() => {
+        sendData();
+    }, 2000);
+}
+
+function stopTracking() {
+    console.log("Stop Tracking function called.");
+    clearInterval(interval);
+}
+
+const dataKey = "google_meet_data";
+
+function getData() {
+    try {
+        return JSON.parse(sessionStorage.getItem(dataKey)) || [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function setData(data) {
+    try {
+        const raw = JSON.stringify(data);
+        sessionStorage.setItem(dataKey, raw);
+    } catch (error) {}
 }
