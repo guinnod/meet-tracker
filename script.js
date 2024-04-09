@@ -1,3 +1,5 @@
+const dataKey = "google_meet_data";
+
 (function insertStyles() {
     const styles = `
     .modal-anchor {
@@ -137,6 +139,8 @@
 
     document.body.appendChild(button);
 
+    sessionStorage.removeItem(dataKey);
+
     function closeModal() {
         modalAnchor.style.display = "none";
     }
@@ -176,7 +180,7 @@ var observingInterval;
 var sendingInterval;
 
 const observingIntervalTime = 1000;
-const sendingIntervalTime = 2000;
+const sendingIntervalTime = 5000;
 
 function startTracking() {
     observingInterval = setInterval(() => {
@@ -193,8 +197,6 @@ function stopTracking() {
     clearInterval(sendingInterval);
 }
 
-const dataKey = "google_meet_data";
-
 function getData() {
     try {
         return JSON.parse(sessionStorage.getItem(dataKey)) || [];
@@ -210,8 +212,19 @@ function setData(data) {
     } catch (error) {}
 }
 
+function getMeetId() {
+    const pathSegments = window.location.pathname.split("/");
+    return pathSegments[pathSegments.length - 1];
+}
+
 async function sendData() {
     const data = getData();
+    if (data.length === 0) {
+        return;
+    }
+
+    const meetingId = getMeetId();
+
     try {
         // TO-DO: Send data to the server
         await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -219,7 +232,7 @@ async function sendData() {
             throw new Error("Failed to send data");
         }
         setData([]);
-        console.log("Data sent");
+        console.log("Data sent", data, meetingId);
     } catch (error) {}
 }
 
@@ -256,6 +269,8 @@ function collectData() {
         });
     });
 
+    const withVisibleVideo = [];
+
     Object.entries(groupedElements).forEach(([className, group]) => {
         if (
             group.length > 1 &&
@@ -270,12 +285,21 @@ function collectData() {
                     commonParent
                 );
                 const hasVisibleVideo = checkForVisibleVideo(parentAfterCommon);
-                console.log(
-                    `Element text: "${element.innerText}", Has visible video: ${hasVisibleVideo}`
-                );
+                if (hasVisibleVideo) {
+                    withVisibleVideo.push(element.innerText);
+                }
             });
         }
     });
+
+    if (withVisibleVideo.length === 0) {
+        return;
+    }
+
+    const pack = { time: Date.now(), data: withVisibleVideo };
+    const data = getData();
+    data.push(pack);
+    setData(data);
 }
 
 function checkForVisibleVideo(parent) {
