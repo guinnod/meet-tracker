@@ -193,14 +193,6 @@ function stopTracking() {
     clearInterval(sendingInterval);
 }
 
-function observe() {
-    console.log("Observe");
-}
-
-async function sendData() {
-    console.log("Data sent");
-}
-
 const dataKey = "google_meet_data";
 
 function getData() {
@@ -216,4 +208,16 @@ function setData(data) {
         const raw = JSON.stringify(data);
         sessionStorage.setItem(dataKey, raw);
     } catch (error) {}
+}
+
+async function sendData() {
+    const data = getData();
+    // TO-DO: Send data to the server
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    setData([]);
+    console.log("Data sent");
+}
+
+function observe() {
+    console.log("Observe");
 }
