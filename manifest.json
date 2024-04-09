@@ -1,0 +1,17 @@
+{
+    "name": "Video track",
+    "version": "1.0.0",
+    "description": "Tracking video tags",
+    "manifest_version": 3,
+    "author": "Abzal Slamkozha",
+    "action": {
+        "default_popup": "index.html",
+        "default_title": "Video track"
+    },
+    "content_scripts": [
+        {
+            "js": ["script.js"],
+            "matches": ["<all_urls>"]
+        }
+    ]
+}
