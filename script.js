@@ -212,12 +212,115 @@ function setData(data) {
 
 async function sendData() {
     const data = getData();
-    // TO-DO: Send data to the server
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    setData([]);
-    console.log("Data sent");
+    try {
+        // TO-DO: Send data to the server
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        if (false) {
+            throw new Error("Failed to send data");
+        }
+        setData([]);
+        console.log("Data sent");
+    } catch (error) {}
 }
 
 function observe() {
     console.log("Observe");
+    collectData();
+}
+
+function collectData() {
+    const groupedElements = {};
+
+    ["div", "span", "p", "h1", "h2", "h3", "h4", "h5", "h6"].forEach((tag) => {
+        document.querySelectorAll(tag).forEach((el) => {
+            const ariaHidden = el.getAttribute("aria-hidden") === "true";
+            const hasRoleTooltip = el.getAttribute("role") === "tooltip";
+
+            if (
+                el.innerText.trim() !== "" &&
+                el.children.length === 0 &&
+                !ariaHidden &&
+                !hasRoleTooltip
+            ) {
+                const className = el.className || "no-class";
+
+                if (!groupedElements[className]) {
+                    groupedElements[className] = [];
+                }
+
+                groupedElements[className].push({
+                    element: el,
+                    depth: calculateDepth(el),
+                });
+            }
+        });
+    });
+
+    Object.entries(groupedElements).forEach(([className, group]) => {
+        if (
+            group.length > 1 &&
+            group.every((item) => item.depth === group[0].depth)
+        ) {
+            const elements = group.map((item) => item.element);
+            const commonParent = findFirstCommonParent(elements);
+
+            elements.forEach((element) => {
+                const parentAfterCommon = findParentAfterCommon(
+                    element,
+                    commonParent
+                );
+                const hasVisibleVideo = checkForVisibleVideo(parentAfterCommon);
+                console.log(
+                    `Element text: "${element.innerText}", Has visible video: ${hasVisibleVideo}`
+                );
+            });
+        }
+    });
+}
+
+function checkForVisibleVideo(parent) {
+    const videos = parent ? parent.getElementsByTagName("video") : [];
+    return Array.from(videos).some((video) => video.style.display !== "none");
+}
+
+function calculateDepth(el) {
+    let depth = 0;
+    while (el.parentElement) {
+        depth++;
+        el = el.parentElement;
+    }
+    return depth;
+}
+
+function findFirstCommonParent(elements) {
+    const paths = elements.map((el) => {
+        const path = [];
+        while (el) {
+            path.unshift(el);
+            el = el.parentElement;
+        }
+        return path;
+    });
+
+    let commonParent = null;
+    for (let i = 0; i < paths[0].length; i++) {
+        const current = paths[0][i];
+        if (paths.every((path) => path[i] === current)) {
+            commonParent = current;
+        } else {
+            break;
+        }
+    }
+    return commonParent;
+}
+
+function findParentAfterCommon(element, commonParent) {
+    let parent = element.parentElement;
+    while (parent && parent !== commonParent) {
+        if (parent.parentElement === commonParent) {
+            return parent;
+        }
+        parent = parent.parentElement;
+    }
+    return null;
 }
